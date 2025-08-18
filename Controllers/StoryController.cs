@@ -31,7 +31,7 @@ namespace MentalHealthSystem.Controllers
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
-        [HttpDelete("Delete/{id}")]
+        [HttpPost("Delete/{id}")]
         [Authorize]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {

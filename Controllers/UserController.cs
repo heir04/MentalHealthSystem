@@ -46,7 +46,6 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpPost("Create")]
-        [Authorize]
         public async Task<IActionResult> Create(CreateUserDto userDto)
         {
             var response = await _userService.Create(userDto);
@@ -62,6 +61,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("GetAll")]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var response = await _userService.GetAll();
@@ -69,6 +69,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("Profile")]
+        [Authorize]
         public async Task<IActionResult> GetById()
         {
             var response = await _userService.Profile();
