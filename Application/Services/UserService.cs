@@ -103,9 +103,9 @@ namespace MentalHealthSystem.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<LoginDto>> Login(LoginDto loginDto)
+        public async Task<BaseResponse<UserDto>> Login(LoginDto loginDto)
         {
-            var response = new BaseResponse<LoginDto>();
+            var response = new BaseResponse<UserDto>();
             var user = await _unitOfWork.User.Get(x => x.Email == loginDto.Email.ToLower() && !x.IsDeleted);
 
             if (user is null)
@@ -128,7 +128,7 @@ namespace MentalHealthSystem.Application.Services
             }
 
             
-            response.Data = new LoginDto
+            response.Data = new UserDto
             {
                 Id = user.Id,
                 Email = user.Email,

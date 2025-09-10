@@ -12,6 +12,7 @@ namespace MentalHealthSystem.Infrastructure.Repository
         public IStoryRepository Story { get; }
         public ITherapistRepository Therapist { get; }
         public IUserRepository User { get; }
+        public ITherapySessionRepository TherapySession { get; }
 
         public UnitOfWork(
             ApplicationContext context,
@@ -19,6 +20,7 @@ namespace MentalHealthSystem.Infrastructure.Repository
             IFlaggedContentRepository flaggedContentRepository,
             IStoryRepository storyRepository,
             ITherapistRepository therapistRepository,
+            ITherapySessionRepository therapySessionRepository,
             IUserRepository userRepository
         )
         {
@@ -27,6 +29,7 @@ namespace MentalHealthSystem.Infrastructure.Repository
             FlaggedContent = flaggedContentRepository;
             Story = storyRepository;
             Therapist = therapistRepository;
+            TherapySession = therapySessionRepository;
             User = userRepository;
         }
 

@@ -6,6 +6,7 @@ namespace MentalHealthSystem.Application.Interfaces.IRepositories
         IFlaggedContentRepository FlaggedContent { get; }
         IStoryRepository Story { get; }
         ITherapistRepository Therapist { get; }
+        ITherapySessionRepository TherapySession { get; }
         IUserRepository User { get; }
         Task<int> SaveChangesAsync();
     }

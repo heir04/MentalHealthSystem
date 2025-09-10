@@ -20,12 +20,16 @@ namespace MentalHealthSystem.Application.Services
                 response.Message = $"Therapist with email: {therapistDto.Email} already exist";
                 return response;
             }
-
+            
+            string saltString = HashingHelper.GenerateSalt();
+            string hashedPassword = HashingHelper.HashPassword("12345", saltString);
             var user = new User
             {
                 Email = therapistDto.Email,
                 Username = therapistDto.FullName.Replace(" ", "").ToLower(),
                 Role = "Therapist",
+                HashSalt = saltString,
+                PasswordHash = hashedPassword,
                 IsActive = true,
                 CreatedOn = DateTime.UtcNow
             };
@@ -40,6 +44,7 @@ namespace MentalHealthSystem.Application.Services
             };
 
             await _unitOfWork.Therapist.Register(therapist);
+            await _unitOfWork.User.Register(user);
             await _unitOfWork.SaveChangesAsync();
 
             response.Data = therapistDto;

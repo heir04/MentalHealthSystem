@@ -80,6 +80,8 @@ namespace MentalHealthSystem.Application.Services
                 {
                     Id = c.Id,
                     Content = c.Content,
+                    StoryId = c.StoryId,
+                    UserId = c.UserId,
                     UserName = c.User?.Username,
                     CreatedOn = c.CreatedOn
                 })]

@@ -9,6 +9,7 @@ namespace MentalHealthSystem.Infrastructure.Data
         public DbSet<FlaggedContent> FlaggedContents { get; set; }
         public DbSet<Story> Story { get; set; }
         public DbSet<Therapist> Therapists { get; set; }
+        public DbSet<TherapySession> TherapySessions { get; set; }
         public DbSet<User> Users { get; set; }
 
     }

@@ -10,7 +10,6 @@ namespace MentalHealthSystem.Domain.Entities
         public string? Bio { get; set; }
         public string? ContactLink { get; set; }
         public TherapistAvailability Availability { get; set; }
-
         public User? User { get; set; }
     }
 }

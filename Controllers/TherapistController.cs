@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using MentalHealthSystem.Application.DTOs;
 using MentalHealthSystem.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -16,7 +12,6 @@ namespace MentalHealthSystem.Controllers
         private readonly ITherapistService _therapistService = therapistService;
 
         [HttpPost("Create")]
-        [Authorize]
         public async Task<IActionResult> Create(CreateTherapistDto therapistDto)
         {
             var response = await _therapistService.Create(therapistDto);

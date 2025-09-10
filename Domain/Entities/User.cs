@@ -1,5 +1,3 @@
-using MentalHealthSystem.Domain.Enums;
-
 namespace MentalHealthSystem.Domain.Entities
 {
     public class User : BaseEntity
