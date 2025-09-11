@@ -12,7 +12,6 @@ namespace MentalHealthSystem.Application.DTOs
 
     public class CreateCommentDto
     {
-        public Guid StoryId { get; set; }
         public string Content { get; set; } = string.Empty;
     }
 

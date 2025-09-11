@@ -30,7 +30,6 @@ namespace MentalHealthSystem.Application.Services
                 Role = "Therapist",
                 HashSalt = saltString,
                 PasswordHash = hashedPassword,
-                IsActive = true,
                 CreatedOn = DateTime.UtcNow
             };
 
@@ -38,6 +37,7 @@ namespace MentalHealthSystem.Application.Services
             {
                 FullName = therapistDto.FullName,
                 Specialization = therapistDto.Specialization,
+                CertificationLink = therapistDto.CertificationLink,
                 Bio = therapistDto.Bio,
                 ContactLink = therapistDto.ContactLink,
                 UserId = user.Id
@@ -105,6 +105,7 @@ namespace MentalHealthSystem.Application.Services
                 UserId = therapist.UserId,
                 FullName = therapist.FullName,
                 Specialization = therapist.Specialization,
+                CertificationLink = therapist.CertificationLink,
                 Bio = therapist.Bio,
                 ContactLink = therapist.ContactLink,
                 Availability = therapist.Availability,
@@ -116,10 +117,60 @@ namespace MentalHealthSystem.Application.Services
             return response;
         }
 
+        public async Task<BaseResponse<TherapistDto>> ApproveTherapist(Guid id)
+        {
+            var response = new BaseResponse<TherapistDto>();
+
+            var therapist = await _unitOfWork.Therapist.Get(t => t.Id == id && !t.IsDeleted);
+            if (therapist is null)
+            {
+                response.Message = "Therapist not found";
+                return response;
+            }
+
+            therapist.IsAdminApproved = true;
+            therapist.LastModifiedBy = _validatorHelper.GetUserId();
+            therapist.LastModifiedOn = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangesAsync();
+
+            response.Message = "Success";
+            response.Status = true;
+            return response;
+        }
+
         public async Task<BaseResponse<IEnumerable<TherapistDto>>> GetAll()
         {
             var response = new BaseResponse<IEnumerable<TherapistDto>>();
             var therapists = await _unitOfWork.Therapist.GetAll(t => !t.IsDeleted);
+            if (therapists is null || !therapists.Any())
+            {
+                response.Message = "No therapists found";
+                return response;
+            }
+
+            response.Data = therapists.Select(t => new TherapistDto
+            {
+                Id = t.Id,
+                UserId = t.UserId,
+                FullName = t.FullName,
+                Specialization = t.Specialization,
+                CertificationLink = t.CertificationLink,
+                Bio = t.Bio,
+                ContactLink = t.ContactLink,
+                Availability = t.Availability,
+                UserName = t.User?.Username
+            });
+
+            response.Message = "Success";
+            response.Status = true;
+            return response;
+        }
+
+        public async Task<BaseResponse<IEnumerable<TherapistDto>>> GetAdminApproved()
+        {
+            var response = new BaseResponse<IEnumerable<TherapistDto>>();
+            var therapists = await _unitOfWork.Therapist.GetAll(t => !t.IsDeleted && t.IsAdminApproved);
             if (therapists is null || !therapists.Any())
             {
                 response.Message = "No therapists found";

@@ -19,6 +19,7 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<ITherapistService, TherapistService>();
 builder.Services.AddScoped<ITherapySessionService, TherapySessionService>();
+builder.Services.AddScoped<IReactionService, ReactionService>();
 
 builder.Services.AddScoped<ValidatorHelper>();
 builder.Services.AddScoped<JwtHelper>();
@@ -30,7 +31,7 @@ builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 builder.Services.AddScoped<IFlaggedContentRepository, FlaggedContentRepository>();
 builder.Services.AddScoped<ITherapistRepository, TherapistRepository>();
 builder.Services.AddScoped<ITherapySessionRepository, TherapySessionRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IReactionRepository, ReactionRepository>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

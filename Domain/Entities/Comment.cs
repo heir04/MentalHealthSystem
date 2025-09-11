@@ -7,5 +7,6 @@ namespace MentalHealthSystem.Domain.Entities
         public string? Content { get; set; }
         public User? User { get; set; }
         public Story? Story { get; set; }
+        public ICollection<Reaction>? Reactions { get; set; }
     }
 }

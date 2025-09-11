@@ -16,11 +16,24 @@ namespace MentalHealthSystem.Application.Services
             var response = new BaseResponse<TherapySessionDto>();
             var userId = _validatorHelper.GetUserId();
 
+            var therapist = await _unitOfWork.Therapist.Get(t => t.Id == therapistid);
+            if (therapist is null)
+            {
+                response.Message = "Therapist not found";
+                return response;
+            }
+
+            if (!therapist.IsAdminApproved )
+            {
+                response.Message = "Therapist is not approved";
+                return response;
+            }
+
             var sessionExist = await _unitOfWork.TherapySession.ExistsAsync(ts => ts.UserId == userId && ts.TherapistId == therapistid && (ts.Status == TherapySessionStatus.Pending || ts.Status == TherapySessionStatus.Scheduled));
             if (sessionExist)
             {
                 response.Message = "You have a pending or scheduled session with the Therapist";
-                return response;
+                return response;   
             }
 
             var session = new TherapySession

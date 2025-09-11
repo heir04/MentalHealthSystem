@@ -8,7 +8,7 @@ namespace MentalHealthSystem.Application.DTOs
         public DateTime CreatedOn { get; set; }
         public string? UserName { get; set; }
         public List<CommentDto>? Comments { get; set; }
-        public List<ReactionDto>? Reactions { get; set; }
+        // public List<ReactionDto>? Reactions { get; set; }
     }
 
     public class CreateStoryDto

@@ -9,6 +9,7 @@ namespace MentalHealthSystem.Infrastructure.Repository
         private bool _disposed = false;
         public ICommentRepository Comment { get; }
         public IFlaggedContentRepository FlaggedContent { get; }
+        public IReactionRepository Reaction { get; }
         public IStoryRepository Story { get; }
         public ITherapistRepository Therapist { get; }
         public IUserRepository User { get; }
@@ -18,6 +19,7 @@ namespace MentalHealthSystem.Infrastructure.Repository
             ApplicationContext context,
             ICommentRepository commentRepository,
             IFlaggedContentRepository flaggedContentRepository,
+            IReactionRepository reactionRepository,
             IStoryRepository storyRepository,
             ITherapistRepository therapistRepository,
             ITherapySessionRepository therapySessionRepository,
@@ -27,6 +29,7 @@ namespace MentalHealthSystem.Infrastructure.Repository
             _context = context;
             Comment = commentRepository;
             FlaggedContent = flaggedContentRepository;
+            Reaction = reactionRepository;
             Story = storyRepository;
             Therapist = therapistRepository;
             TherapySession = therapySessionRepository;

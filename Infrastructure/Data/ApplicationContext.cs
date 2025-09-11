@@ -7,6 +7,7 @@ namespace MentalHealthSystem.Infrastructure.Data
     {
         public DbSet<Comment> Comments { get; set; }
         public DbSet<FlaggedContent> FlaggedContents { get; set; }
+        public DbSet<Reaction> Reactions { get; set; }
         public DbSet<Story> Story { get; set; }
         public DbSet<Therapist> Therapists { get; set; }
         public DbSet<TherapySession> TherapySessions { get; set; }

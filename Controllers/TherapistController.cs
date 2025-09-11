@@ -26,6 +26,14 @@ namespace MentalHealthSystem.Controllers
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
+        [HttpPut("Approve/{id}")]
+        [Authorize]
+        public async Task<IActionResult> ApproveTherapist([FromRoute] Guid id)
+        {
+            var response = await _therapistService.ApproveTherapist(id);
+            return response.Status ? Ok(response) : BadRequest(response);
+        }
+
         [HttpPost("Delete/{id}")]
         [Authorize]
         public async Task<IActionResult> Delete([FromRoute] Guid id)

@@ -4,6 +4,7 @@ namespace MentalHealthSystem.Application.Interfaces.IRepositories
     {
         ICommentRepository Comment { get; }
         IFlaggedContentRepository FlaggedContent { get; }
+        IReactionRepository Reaction { get; }
         IStoryRepository Story { get; }
         ITherapistRepository Therapist { get; }
         ITherapySessionRepository TherapySession { get; }

@@ -8,6 +8,7 @@ namespace MentalHealthSystem.Application.DTOs
         public Guid UserId { get; set; }
         public string? FullName { get; set; }
         public string? Specialization { get; set; }
+        public string? CertificationLink { get; set; }
         public string? Bio { get; set; }
         public string? ContactLink { get; set; }
         public TherapistAvailability Availability { get; set; }
@@ -19,9 +20,9 @@ namespace MentalHealthSystem.Application.DTOs
         public string FullName { get; set; } = string.Empty;
         public string Specialization { get; set; } = string.Empty;
         public string? Email { get; set; }
+        public string? CertificationLink { get; set; }
         public string? Bio { get; set; }
         public string? ContactLink { get; set; }
-        public TherapistAvailability Availability { get; set; }
     }
 
     public class UpdateTherapistDto

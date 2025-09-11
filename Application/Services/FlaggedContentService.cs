@@ -58,20 +58,29 @@ namespace MentalHealthSystem.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<CreateFlaggedContentDto>> ReportComment(CreateFlaggedContentDto flaggedContentDto, Guid StoryId)
+        public async Task<BaseResponse<CreateFlaggedContentDto>> ReportComment(CreateFlaggedContentDto flaggedContentDto, Guid commentId)
         {
             var response = new BaseResponse<CreateFlaggedContentDto>();
-            var storyExists = await _unitOfWork.Story.ExistsAsync(s => s.Id == StoryId && !s.IsDeleted);
-            if (!storyExists)
+            var commentExists = await _unitOfWork.Story.ExistsAsync(s => s.Id == commentId && !s.IsDeleted);
+            if (!commentExists)
             {
-                response.Message = "Story not found";
+                response.Message = "Comment not found";
+                return response;
+            }
+
+            var userId = _validatorHelper.GetUserId();
+
+            var flagExist = await _unitOfWork.FlaggedContent.ExistsAsync(fc => fc.CommentId == commentId && fc.ReportedByUserId == userId);
+            if (flagExist)
+            {
+                response.Message = "Comments already reported by you";
                 return response;
             }
 
             var flaggedContent = new FlaggedContent
             {
                 CommentId = flaggedContentDto.CommentId,
-                ReportedByUserId = _validatorHelper.GetUserId(),
+                ReportedByUserId = userId,
                 Reason = flaggedContentDto.Reason
             };
 
@@ -84,20 +93,29 @@ namespace MentalHealthSystem.Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<CreateFlaggedContentDto>> ReportStory(CreateFlaggedContentDto flaggedContentDto, Guid StoryId)
+        public async Task<BaseResponse<CreateFlaggedContentDto>> ReportStory(CreateFlaggedContentDto flaggedContentDto, Guid storyId)
         {
             var response = new BaseResponse<CreateFlaggedContentDto>();
-            var storyExists = await _unitOfWork.Story.ExistsAsync(s => s.Id == StoryId && !s.IsDeleted);
+            var storyExists = await _unitOfWork.Story.ExistsAsync(s => s.Id == storyId && !s.IsDeleted);
             if (!storyExists)
             {
                 response.Message = "Story not found";
                 return response;
             }
 
+            var userId = _validatorHelper.GetUserId();
+
+            var flagExist = await _unitOfWork.FlaggedContent.ExistsAsync(fc => fc.StoryId == storyId && fc.ReportedByUserId == userId);
+            if (flagExist)
+            {
+                response.Message = "Comments already reported by you";
+                return response;
+            }
+
             var flaggedContent = new FlaggedContent
             {
-                StoryId = StoryId,
-                ReportedByUserId = _validatorHelper.GetUserId(),
+                StoryId = storyId,
+                ReportedByUserId = userId,
                 Reason = flaggedContentDto.Reason
             };
 
