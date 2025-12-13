@@ -20,6 +20,7 @@ builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<ITherapistService, TherapistService>();
 builder.Services.AddScoped<ITherapySessionService, TherapySessionService>();
 builder.Services.AddScoped<IReactionService, ReactionService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 builder.Services.AddScoped<ValidatorHelper>();
 builder.Services.AddScoped<JwtHelper>();

@@ -16,10 +16,7 @@ namespace MentalHealthSystem.Controllers
             _reactionService = reactionService;
         }
 
-        /// <summary>
-        /// React to a story (Like, Love, Laugh, Sad, etc.)
-        /// </summary>
-        [HttpPost("Story/{storyId}")]
+        [HttpPost("React/{storyId}")]
         [Authorize]
         public async Task<IActionResult> ReactToStory([FromRoute] Guid storyId, [FromBody] CreateReactionDto reactionDto)
         {
@@ -27,10 +24,7 @@ namespace MentalHealthSystem.Controllers
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
-        /// <summary>
-        /// React to a comment (Like, Love, Laugh, Sad, etc.)
-        /// </summary>
-        [HttpPost("Comment/{commentId}")]
+        [HttpPost("React/{commentId}")]
         [Authorize]
         public async Task<IActionResult> ReactToComment([FromRoute] Guid commentId, [FromBody] CreateReactionDto reactionDto)
         {
@@ -38,10 +32,7 @@ namespace MentalHealthSystem.Controllers
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
-        /// <summary>
-        /// Remove reaction from a story
-        /// </summary>
-        [HttpDelete("Story/{storyId}")]
+        [HttpPost("RemoveReaction/{storyId}")]
         [Authorize]
         public async Task<IActionResult> RemoveReactionFromStory([FromRoute] Guid storyId)
         {
@@ -49,10 +40,7 @@ namespace MentalHealthSystem.Controllers
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
-        /// <summary>
-        /// Remove reaction from a comment
-        /// </summary>
-        [HttpDelete("Comment/{commentId}")]
+        [HttpPost("RemoveReaction/{commentId}")]
         [Authorize]
         public async Task<IActionResult> RemoveReactionFromComment([FromRoute] Guid commentId)
         {
@@ -60,40 +48,28 @@ namespace MentalHealthSystem.Controllers
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
-        /// <summary>
-        /// Get all reactions for a story
-        /// </summary>
-        [HttpGet("Story/{storyId}")]
+        [HttpGet("GetReactions/{storyId}")]
         public async Task<IActionResult> GetStoryReactions([FromRoute] Guid storyId)
         {
             var response = await _reactionService.GetStoryReactionsAsync(storyId);
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
-        /// <summary>
-        /// Get all reactions for a comment
-        /// </summary>
-        [HttpGet("Comment/{commentId}")]
+        [HttpGet("GetReactions/{commentId}")]
         public async Task<IActionResult> GetCommentReactions([FromRoute] Guid commentId)
         {
             var response = await _reactionService.GetCommentReactionsAsync(commentId);
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
-        /// <summary>
-        /// Get reaction summary for a story (counts by type)
-        /// </summary>
-        [HttpGet("Story/{storyId}/Summary")]
+        [HttpGet("GetReactions/{storyId}/Summary")]
         public async Task<IActionResult> GetStoryReactionSummary([FromRoute] Guid storyId)
         {
             var response = await _reactionService.GetStoryReactionSummaryAsync(storyId);
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
-        /// <summary>
-        /// Get reaction summary for a comment (counts by type)
-        /// </summary>
-        [HttpGet("Comment/{commentId}/Summary")]
+        [HttpGet("GetReactions/{commentId}/Summary")]
         public async Task<IActionResult> GetCommentReactionSummary([FromRoute] Guid commentId)
         {
             var response = await _reactionService.GetCommentReactionSummaryAsync(commentId);
