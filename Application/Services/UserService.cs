@@ -13,14 +13,14 @@ namespace MentalHealthSystem.Application.Services
         public async Task<BaseResponse<CreateUserDto>> Create(CreateUserDto userDto)
         {
             var response = new BaseResponse<CreateUserDto>();
-            var ifEmailExist = await _unitOfWork.User.ExistsAsync(x => x.Email == userDto.Email);
+            var ifEmailExist = await _unitOfWork.User.ExistsAsync(x => x.Email == userDto.Email&& !x.IsDeleted);
             if (ifEmailExist)
             {
                 response.Message = $"User with email: {userDto.Email} already exist";
                 return response;
             }
 
-            var ifUsernameExist = await _unitOfWork.User.ExistsAsync(x => x.Username == userDto.Username);
+            var ifUsernameExist = await _unitOfWork.User.ExistsAsync(x => x.Username == userDto.Username && !x.IsDeleted);
             if (ifUsernameExist)
             {
                 response.Message = $"User with Username: {userDto.Username} already exist";
