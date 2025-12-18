@@ -336,7 +336,7 @@ namespace MentalHealthSystem.Application.Services
             foreach (var story in allStories)
             {
                 // Get comments for this story
-                var storyComments = allComments.Where(c => c.StoryId == story.Id).ToList();
+                var storyComments = allComments.Where(c => c.StoryId == story.Id && !c.IsDeleted).ToList();
 
                 // Get reactions for this story
                 var storyReactions = await _unitOfWork.Reaction.GetReactionsByStoryAsync(story.Id);
@@ -355,13 +355,14 @@ namespace MentalHealthSystem.Application.Services
                     CreatedOn = story.CreatedOn,
                     CommentCount = storyComments.Count,
                     ReactionCount = storyReactions.Count(),
-                    Comments = storyComments.Select(c => new CommentDto
+                    Comments = storyComments.OrderByDescending(c => c.CreatedOn).Select(c => new CommentDto
                     {
                         Id = c.Id,
                         StoryId = c.StoryId,
                         UserId = c.UserId,
                         UserName = c.User?.Username,
                         Content = c.Content,
+                        LikesCount = allReactions.Count(r => r.CommentId == c.Id && !r.IsDeleted),
                         CreatedOn = c.CreatedOn
                     }).ToList(),
                     ReactionBreakdown = reactionBreakdown.Any() ? reactionBreakdown : null

@@ -25,6 +25,7 @@ namespace MentalHealthSystem.Application.Services
                 Id = flaggedContent.Id,
                 ReportedByUserId = flaggedContent.ReportedByUserId,
                 StoryId = flaggedContent.StoryId,
+                CommentId = flaggedContent.CommentId,
                 Reason = flaggedContent.Reason,
                 IsReviewed = flaggedContent.IsReviewed,
                 AdminResponse = flaggedContent.AdminResponse
@@ -49,6 +50,7 @@ namespace MentalHealthSystem.Application.Services
                 Id = f.Id,
                 ReportedByUserId = f.ReportedByUserId,
                 StoryId = f.StoryId,
+                CommentId = f.CommentId,
                 Reason = f.Reason,
                 IsReviewed = f.IsReviewed,
                 AdminResponse = f.AdminResponse

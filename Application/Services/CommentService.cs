@@ -14,7 +14,7 @@ namespace MentalHealthSystem.Application.Services
         {
             var response = new BaseResponse<CreateCommentDto>();
 
-            var story = await _unitOfWork.Story.Get(s => !s.IsDeleted);
+            var story = await _unitOfWork.Story.Get(s => s.Id == storyId && !s.IsDeleted);
             if (story is null)
             {
                 response.Message = "Story not found!";
@@ -39,7 +39,7 @@ namespace MentalHealthSystem.Application.Services
         {
             var response = new BaseResponse<CommentDto>();
 
-            var comment = await _unitOfWork.Comment.Get(c => !c.IsDeleted);
+            var comment = await _unitOfWork.Comment.Get(c => c.Id == id && !c.IsDeleted);
             if (comment is null)
             {
                 response.Message = "Not found!";
@@ -53,7 +53,7 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
-            if (comment.UserId != userId || _validatorHelper.GetUserRole() != "Admin")
+            if (_validatorHelper.GetUserRole() != "Admin" && comment.UserId != userId)
             {
                 response.Message = "Not Authorized";
                 return response;
@@ -63,6 +63,8 @@ namespace MentalHealthSystem.Application.Services
             comment.IsDeleted = true;
             comment.IsDeletedBy = userId;
             comment.IsDeletedOn = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangesAsync();
 
             response.Message = "Success";
             response.Status = true;

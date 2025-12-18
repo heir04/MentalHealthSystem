@@ -23,11 +23,11 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
-            if (!therapist.IsAdminApproved )
-            {
-                response.Message = "Therapist is not approved";
-                return response;
-            }
+            // if (!therapist.IsAdminApproved )
+            // {
+            //     response.Message = "Therapist is not approved";
+            //     return response;
+            // }
 
             var sessionExist = await _unitOfWork.TherapySession.ExistsAsync(ts => ts.UserId == userId && ts.TherapistId == therapistid && (ts.Status == TherapySessionStatus.Pending || ts.Status == TherapySessionStatus.Scheduled));
             if (sessionExist)
@@ -103,13 +103,14 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
            
-            response.Data = sessions.Select(ts => new TherapySessionDto
+            response.Data = [.. sessions.Select(ts => new TherapySessionDto
             {
                 Id = ts.Id,
                 UserId = ts.UserId,
                 TherapistId = ts.TherapistId,
+                TherapistName = ts.Therapist?.FullName,
                 Status = ts.Status.ToString()
-            }).ToList();
+            })];
             response.Status = true;
             response.Message = "Success";
 
@@ -122,7 +123,13 @@ namespace MentalHealthSystem.Application.Services
             var userId = _validatorHelper.GetUserId();
 
             var therapist = await _unitOfWork.Therapist.Get(th => th.UserId == userId);
-            var sessions = await _unitOfWork.TherapySession.GetAll(ts => ts.TherapistId == therapist.Id);
+            if (therapist is null)
+            {
+                response.Message = "Therapist not found";
+                return response;
+            }
+            
+            var sessions = await _unitOfWork.TherapySession.GetAllSessions(ts => ts.TherapistId == therapist.Id);
 
             if (!sessions.Any())
             {
@@ -134,6 +141,7 @@ namespace MentalHealthSystem.Application.Services
             {
                 Id = ts.Id,
                 UserId = ts.UserId,
+                Email = ts.User?.Email,
                 TherapistId = ts.TherapistId,
                 Status = ts.Status.ToString()
             })];

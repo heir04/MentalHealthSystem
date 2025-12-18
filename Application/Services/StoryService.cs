@@ -54,6 +54,8 @@ namespace MentalHealthSystem.Application.Services
             story.IsDeletedOn = DateTime.UtcNow;
             story.IsDeletedBy = userId;
 
+            await _unitOfWork.SaveChangesAsync();
+
             response.Message = "Success";
             response.Status = true;
             return response;

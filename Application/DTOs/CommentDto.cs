@@ -6,6 +6,7 @@ namespace MentalHealthSystem.Application.DTOs
         public Guid StoryId { get; set; }
         public Guid UserId { get; set; }
         public string? Content { get; set; }
+        public int LikesCount { get; set; }
         public DateTime CreatedOn { get; set; }
         public string? UserName { get; set; } 
     }

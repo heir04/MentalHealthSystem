@@ -704,6 +704,7 @@ Get all stories with complete statistics including comments and reactions.
             "userId": "111e2222-e89b-12d3-a456-426614174000",
             "userName": "commenter",
             "content": "Thanks for sharing!",
+            "likesCount": 12,
             "createdOn": "2025-12-17T11:00:00Z"
           }
         ],
@@ -1172,7 +1173,7 @@ Get specific therapy session details.
 **GET** `/api/TherapySession/GetAllByTherapist`  
 🔒 **Requires Authentication** (Therapist only)
 
-Get all sessions for the authenticated therapist.
+Get all sessions for the authenticated therapist. The response includes user email addresses so therapists can send booking details and session information directly to their clients.
 
 **Response:**
 ```json
@@ -1183,12 +1184,14 @@ Get all sessions for the authenticated therapist.
     {
       "id": "123e4567-e89b-12d3-a456-426614174000",
       "userId": "456e7890-e89b-12d3-a456-426614174000",
+      "email": "user@example.com",
       "therapistId": "789e0123-e89b-12d3-a456-426614174000",
       "status": "Scheduled"
     },
     {
       "id": "222e3333-e89b-12d3-a456-426614174000",
       "userId": "555e6666-e89b-12d3-a456-426614174000",
+      "email": "anotheruser@example.com",
       "therapistId": "789e0123-e89b-12d3-a456-426614174000",
       "status": "Pending"
     }
@@ -1214,6 +1217,7 @@ Get all sessions for the authenticated user.
       "id": "123e4567-e89b-12d3-a456-426614174000",
       "userId": "456e7890-e89b-12d3-a456-426614174000",
       "therapistId": "789e0123-e89b-12d3-a456-426614174000",
+      "therapistName": "Dr. Jane Smith",
       "status": "Scheduled"
     }
   ]
