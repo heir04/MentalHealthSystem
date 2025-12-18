@@ -7,6 +7,8 @@ namespace MentalHealthSystem.Application.DTOs
         public string? Content { get; set; }
         public DateTime CreatedOn { get; set; }
         public string? UserName { get; set; }
+        public int LikesCount { get; set; }
+        public int CommentsCount { get; set; }
         public List<CommentDto>? Comments { get; set; }
         // public List<ReactionDto>? Reactions { get; set; }
     }

@@ -329,12 +329,15 @@ Get a specific story by ID.
     "content": "Story content...",
     "createdOn": "2025-09-11T12:00:00Z",
     "userName": "username",
+    "commentsCount": 5,
+    "likesCount": 42,
     "comments": [
       {
         "id": "789e0123-e89b-12d3-a456-426614174000",
         "storyId": "123e4567-e89b-12d3-a456-426614174000",
         "userId": "111e2222-e89b-12d3-a456-426614174000",
         "content": "Great story!",
+        "likesCount": 8,
         "createdOn": "2025-09-11T13:00:00Z",
         "userName": "commenter"
       }
@@ -363,7 +366,19 @@ Get all stories created by the authenticated user.
       "content": "My story...",
       "createdOn": "2025-09-11T12:00:00Z",
       "userName": "myusername",
-      "comments": null
+      "commentsCount": 3,
+      "likesCount": 25,
+      "comments": [
+        {
+          "id": "789e0123-e89b-12d3-a456-426614174000",
+          "storyId": "123e4567-e89b-12d3-a456-426614174000",
+          "userId": "111e2222-e89b-12d3-a456-426614174000",
+          "content": "Nice post!",
+          "likesCount": 5,
+          "createdOn": "2025-09-11T13:00:00Z",
+          "userName": "commenter"
+        }
+      ]
     }
   ]
 }

@@ -71,22 +71,34 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
+            var storyReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(story.Id, null);
+
+            var commentDtos = new List<CommentDto>();
+            foreach (var comment in story.Comments.Where(c => !c.IsDeleted))
+            {
+                var commentReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(null, comment.Id);
+                commentDtos.Add(new CommentDto
+                {
+                    Id = comment.Id,
+                    Content = comment.Content,
+                    StoryId = comment.StoryId,
+                    UserId = comment.UserId,
+                    LikesCount = commentReactionCount,
+                    UserName = comment.User?.Username,
+                    CreatedOn = comment.CreatedOn
+                });
+            }
+
             response.Data = new StoryDto
             {
                 Id = story.Id,
                 UserId = story.UserId,
                 UserName = story.User?.Username,
                 Content = story.Content,
+                CommentsCount = story.Comments?.Count(c => !c.IsDeleted) ?? 0,
+                LikesCount = storyReactionCount,
                 CreatedOn = story.CreatedOn,
-                Comments = [.. story.Comments.Select(c => new CommentDto
-                {
-                    Id = c.Id,
-                    Content = c.Content,
-                    StoryId = c.StoryId,
-                    UserId = c.UserId,
-                    UserName = c.User?.Username,
-                    CreatedOn = c.CreatedOn
-                })]
+                Comments = commentDtos
             };
             response.Message = "Success";
             response.Status = true;
@@ -116,7 +128,7 @@ namespace MentalHealthSystem.Application.Services
             response.Status = true;
             return response;
         }
-        
+
         public async Task<BaseResponse<IEnumerable<StoryDto>>> GetAllUserStory()
         {
             var response = new BaseResponse<IEnumerable<StoryDto>>();
@@ -126,7 +138,7 @@ namespace MentalHealthSystem.Application.Services
                 response.Message = "User not found";
                 return response;
             }
-    
+
             var stories = await _unitOfWork.Story.GetAllStory(s => !s.IsDeleted && s.UserId == userId);
 
             if (stories is null || !stories.Any())
@@ -135,14 +147,41 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
-            response.Data = [.. stories.Select(s => new StoryDto
+            var storyDtos = new List<StoryDto>();
+            foreach (var story in stories)
             {
-                Id = s.Id,
-                UserId = s.UserId,
-                UserName = s.User?.Username,
-                Content = s.Content,
-                CreatedOn = s.CreatedOn,
-            })];
+                var storyReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(story.Id, null);
+
+                var commentDtos = new List<CommentDto>();
+                foreach (var comment in story.Comments.Where(c => !c.IsDeleted))
+                {
+                    var commentReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(null, comment.Id);
+                    commentDtos.Add(new CommentDto
+                    {
+                        Id = comment.Id,
+                        Content = comment.Content,
+                        StoryId = comment.StoryId,
+                        UserId = comment.UserId,
+                        LikesCount = commentReactionCount,
+                        UserName = comment.User?.Username,
+                        CreatedOn = comment.CreatedOn
+                    });
+                }
+
+                storyDtos.Add(new StoryDto
+                {
+                    Id = story.Id,
+                    UserId = story.UserId,
+                    UserName = story.User?.Username,
+                    Content = story.Content,
+                    CommentsCount = story.Comments?.Count(c => !c.IsDeleted) ?? 0,
+                    LikesCount = storyReactionCount,
+                    CreatedOn = story.CreatedOn,
+                    Comments = commentDtos
+                });
+            }
+
+            response.Data = storyDtos;
             response.Message = "Success";
             response.Status = true;
             return response;

@@ -18,6 +18,8 @@ namespace MentalHealthSystem.Infrastructure.Repository
             return await _context.Story
                 .Where(expression)
                 .Include(s => s.User)
+                .Include(s => s.Comments)
+                .ThenInclude(c => c.User)
                 .ToListAsync();
         }
 

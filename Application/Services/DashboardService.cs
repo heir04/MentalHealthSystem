@@ -35,11 +35,9 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
-            // Get user statistics
             var stories = await _unitOfWork.Story.GetAll(s => s.UserId == userId && !s.IsDeleted);
             var comments = await _unitOfWork.Comment.GetAll(c => c.UserId == userId && !c.IsDeleted);
             
-            // Get reactions received on user's stories
             var userStoryIds = stories.Select(s => s.Id).ToList();
             var reactionsReceived = 0;
             foreach (var storyId in userStoryIds)
@@ -48,12 +46,10 @@ namespace MentalHealthSystem.Application.Services
                 reactionsReceived += storyReactions.Count();
             }
 
-            // Get upcoming sessions
             var upcomingSessions = await _unitOfWork.TherapySession.GetAll(ts => 
                 ts.UserId == userId && 
                 (ts.Status == TherapySessionStatus.Pending || ts.Status == TherapySessionStatus.Scheduled));
 
-            // Get recent stories
             var recentStories = await _unitOfWork.Story.GetAllStory(s => s.UserId == userId && !s.IsDeleted);
 
             response.Data = new UserDashboardDto
@@ -270,25 +266,20 @@ namespace MentalHealthSystem.Application.Services
 
             var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
 
-            // Get all flagged content
             var allFlaggedContent = await _unitOfWork.FlaggedContent.GetAll(fc => !fc.IsDeleted);
 
-            // Get statistics
             var totalFlagged = allFlaggedContent.Count();
             var pendingReview = allFlaggedContent.Count(fc => !fc.IsReviewed);
             var reviewedContent = allFlaggedContent.Count(fc => fc.IsReviewed);
             var flaggedStories = allFlaggedContent.Count(fc => fc.StoryId != Guid.Empty);
             var flaggedComments = allFlaggedContent.Count(fc => fc.CommentId != Guid.Empty);
 
-            // Get deleted content this month (using IsDeleted flag)
             var contentRemovedThisMonth = allFlaggedContent.Count(fc =>
                 fc.IsReviewed &&
                 fc.LastModifiedOn >= startOfMonth);
 
-            // Get recent flags
             var recentFlags = allFlaggedContent.OrderByDescending(fc => fc.CreatedOn).Take(20);
 
-            // Get flag reason breakdown
             var flagReasonBreakdown = allFlaggedContent
                 .GroupBy(fc => fc.Reason ?? "Unknown")
                 .ToDictionary(g => g.Key, g => g.Count());
@@ -324,27 +315,38 @@ namespace MentalHealthSystem.Application.Services
         {
             var response = new BaseResponse<GeneralDashboardDto>();
 
-            // Get all non-deleted stories
             var allStories = await _unitOfWork.Story.GetAllStory(s => !s.IsDeleted);
             var allComments = await _unitOfWork.Comment.GetAll(c => !c.IsDeleted);
-            var allReactions = await _unitOfWork.Reaction.GetAll(r => !r.IsDeleted);
             var allUsers = await _unitOfWork.User.GetAll(u => !u.IsDeleted);
+            
+            var totalReactions = await _unitOfWork.Reaction.GetReactionCountAsync(null, null);
 
-            // Build stories with statistics
             var storiesWithStats = new List<StoryWithStatsDto>();
 
             foreach (var story in allStories)
             {
-                // Get comments for this story
                 var storyComments = allComments.Where(c => c.StoryId == story.Id && !c.IsDeleted).ToList();
 
-                // Get reactions for this story
-                var storyReactions = await _unitOfWork.Reaction.GetReactionsByStoryAsync(story.Id);
+                var storyReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(story.Id, null);
 
-                // Get reaction breakdown by type
-                var reactionBreakdown = storyReactions
-                    .GroupBy(r => r.Type)
-                    .ToDictionary(g => g.Key, g => g.Count());
+                var reactionGroups = await _unitOfWork.Reaction.GetReactionGroupsByStoryAsync(story.Id);
+                var reactionBreakdown = reactionGroups.ToDictionary(g => g.Key, g => g.Count());
+
+                var commentDtos = new List<CommentDto>();
+                foreach (var comment in storyComments.OrderByDescending(c => c.CreatedOn))
+                {
+                    var commentReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(null, comment.Id);
+                    commentDtos.Add(new CommentDto
+                    {
+                        Id = comment.Id,
+                        StoryId = comment.StoryId,
+                        UserId = comment.UserId,
+                        UserName = comment.User?.Username,
+                        Content = comment.Content,
+                        LikesCount = commentReactionCount,
+                        CreatedOn = comment.CreatedOn
+                    });
+                }
 
                 storiesWithStats.Add(new StoryWithStatsDto
                 {
@@ -354,29 +356,19 @@ namespace MentalHealthSystem.Application.Services
                     Content = story.Content,
                     CreatedOn = story.CreatedOn,
                     CommentCount = storyComments.Count,
-                    ReactionCount = storyReactions.Count(),
-                    Comments = storyComments.OrderByDescending(c => c.CreatedOn).Select(c => new CommentDto
-                    {
-                        Id = c.Id,
-                        StoryId = c.StoryId,
-                        UserId = c.UserId,
-                        UserName = c.User?.Username,
-                        Content = c.Content,
-                        LikesCount = allReactions.Count(r => r.CommentId == c.Id && !r.IsDeleted),
-                        CreatedOn = c.CreatedOn
-                    }).ToList(),
+                    ReactionCount = storyReactionCount,
+                    Comments = commentDtos,
                     ReactionBreakdown = reactionBreakdown.Any() ? reactionBreakdown : null
                 });
             }
 
-            // Order by creation date (newest first)
             storiesWithStats = storiesWithStats.OrderByDescending(s => s.CreatedOn).ToList();
 
             response.Data = new GeneralDashboardDto
             {
                 TotalStories = allStories.Count(),
                 TotalComments = allComments.Count(),
-                TotalReactions = allReactions.Count(),
+                TotalReactions = totalReactions,
                 TotalUsers = allUsers.Count(),
                 Stories = storiesWithStats
             };
