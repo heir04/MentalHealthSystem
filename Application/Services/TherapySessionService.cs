@@ -52,10 +52,30 @@ namespace MentalHealthSystem.Application.Services
         public async Task<BaseResponse<TherapySessionDto>> Get(Guid id)
         {
             var response = new BaseResponse<TherapySessionDto>();
+            var userId = _validatorHelper.GetUserId();
+            var user = await _unitOfWork.User.Get(u => u.Id == userId && !u.IsDeleted);
+            if (user is null)
+            {
+                response.Message = "User not found";
+                return response;
+            }
+
             var session = await _unitOfWork.TherapySession.Get(ts => ts.Id == id);
             if (session is null)
             {
                 response.Message = "Session not found";
+                return response;
+            }
+
+            var therapist = await _unitOfWork.Therapist.Get(th => th.Id == session.TherapistId && !th.IsDeleted);
+
+            bool isSessionOwner = user.Id == session.UserId;
+            bool isAssignedTherapist = therapist != null && therapist.UserId == user.Id;
+            bool isAdmin = user.Role.ToString() == "Admin";
+
+            if (!isSessionOwner && !isAssignedTherapist && !isAdmin)
+            {
+                response.Message = "Unauthorized access to session";
                 return response;
             }
 

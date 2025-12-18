@@ -53,7 +53,7 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
-            if (comment.UserId != userId && _validatorHelper.GetUserRole() != "Admin")
+            if (comment.UserId != userId || _validatorHelper.GetUserRole() != "Admin")
             {
                 response.Message = "Not Authorized";
                 return response;

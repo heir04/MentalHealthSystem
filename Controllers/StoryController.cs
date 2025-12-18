@@ -12,7 +12,7 @@ namespace MentalHealthSystem.Controllers
         private readonly IStoryService _storyService = storyService;
 
         [HttpPost("Create")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> Create(CreateStoryDto storyDto)
         {
             var response = await _storyService.Create(storyDto);
@@ -20,7 +20,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpPut("Update/{id}")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> Update([FromRoute] Guid id, UpdateStoryDto storyDto)
         {
             var response = await _storyService.Update(id, storyDto);
@@ -28,7 +28,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpPost("Delete/{id}")]
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var response = await _storyService.Delete(id);
@@ -36,6 +36,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("GetAll")]
+        [Authorize(Roles = "User,Therapist,Admin")]
         public async Task<IActionResult> GetAll()
         {
             var response = await _storyService.GetAll();
@@ -43,6 +44,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("Get/{id}")]
+        [Authorize(Roles = "User,Therapist,Admin")]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             var response = await _storyService.Get(id);
@@ -50,7 +52,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("GetAllUserStory")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> GetAllUserStory()
         {
             var response = await _storyService.GetAllUserStory();

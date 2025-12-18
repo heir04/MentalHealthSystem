@@ -31,11 +31,48 @@ namespace MentalHealthSystem.Application.Services
             string hashedPassword = HashingHelper.HashPassword(userDto.Password, saltString);
             var user = new User
             {
-                Email = userDto.Email,
+                Email = userDto.Email.ToLower(),
                 Username = userDto.Username,
                 HashSalt = saltString,
                 PasswordHash = hashedPassword,
                 Role = "User"
+            };
+
+            await _unitOfWork.User.Register(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            response.Data = userDto;
+            response.Status = true;
+            response.Message = "User created successfully";
+            return response;
+        }
+
+        public async Task<BaseResponse<CreateUserDto>> CreateAdmin(CreateUserDto userDto)
+        {
+            var response = new BaseResponse<CreateUserDto>();
+            var ifEmailExist = await _unitOfWork.User.ExistsAsync(x => x.Email == userDto.Email&& !x.IsDeleted);
+            if (ifEmailExist)
+            {
+                response.Message = $"User with email: {userDto.Email} already exist";
+                return response;
+            }
+
+            var ifUsernameExist = await _unitOfWork.User.ExistsAsync(x => x.Username == userDto.Username && !x.IsDeleted);
+            if (ifUsernameExist)
+            {
+                response.Message = $"User with Username: {userDto.Username} already exist";
+                return response;
+            }
+
+            string saltString = HashingHelper.GenerateSalt();
+            string hashedPassword = HashingHelper.HashPassword(userDto.Password, saltString);
+            var user = new User
+            {
+                Email = userDto.Email.ToLower(),
+                Username = userDto.Username,
+                HashSalt = saltString,
+                PasswordHash = hashedPassword,
+                Role = "Admin"
             };
 
             await _unitOfWork.User.Register(user);

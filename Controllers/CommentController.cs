@@ -12,7 +12,7 @@ namespace MentalHealthSystem.Controllers
         private readonly ICommentService _commentService = commentService;
 
         [HttpPost("Create/{storyId}")]
-        [Authorize]
+        [Authorize(Roles = "User,Therapist")]
         public async Task<IActionResult> Create([FromRoute] Guid storyId, CreateCommentDto commentDto)
         {
             var response = await _commentService.Create(commentDto, storyId);
@@ -20,7 +20,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpPut("Update/{id}")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> Update([FromRoute] Guid id, UpdateCommentDto commentDto)
         {
             var response = await _commentService.Update(id, commentDto);
@@ -28,7 +28,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpPost("Delete/{id}")]
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var response = await _commentService.Delete(id);
@@ -36,6 +36,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("Get/{id}")]
+        [Authorize(Roles = "User,Therapist,Admin")]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             var response = await _commentService.Get(id);

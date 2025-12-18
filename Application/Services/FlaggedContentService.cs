@@ -61,7 +61,7 @@ namespace MentalHealthSystem.Application.Services
         public async Task<BaseResponse<CreateFlaggedContentDto>> ReportComment(CreateFlaggedContentDto flaggedContentDto, Guid commentId)
         {
             var response = new BaseResponse<CreateFlaggedContentDto>();
-            var commentExists = await _unitOfWork.Story.ExistsAsync(s => s.Id == commentId && !s.IsDeleted);
+            var commentExists = await _unitOfWork.Comment.ExistsAsync(s => s.Id == commentId && !s.IsDeleted);
             if (!commentExists)
             {
                 response.Message = "Comment not found";
@@ -79,7 +79,7 @@ namespace MentalHealthSystem.Application.Services
 
             var flaggedContent = new FlaggedContent
             {
-                CommentId = flaggedContentDto.CommentId,
+                CommentId = commentId,
                 ReportedByUserId = userId,
                 Reason = flaggedContentDto.Reason
             };

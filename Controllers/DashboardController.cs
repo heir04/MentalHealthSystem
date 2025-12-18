@@ -6,20 +6,23 @@ namespace MentalHealthSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DashboardController : ControllerBase
+    public class DashboardController(IDashboardService dashboardService) : ControllerBase
     {
-        private readonly IDashboardService _dashboardService;
-
-        public DashboardController(IDashboardService dashboardService)
-        {
-            _dashboardService = dashboardService;
-        }
+        private readonly IDashboardService _dashboardService = dashboardService;
 
         [HttpGet("User")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> GetUserDashboard()
         {
             var response = await _dashboardService.GetUserDashboard();
+            return response.Status ? Ok(response) : BadRequest(response);
+        }
+
+        [HttpGet("Therapist")]
+        [Authorize(Roles = "Therapist")]
+        public async Task<IActionResult> GetTherapistDashboard()
+        {
+            var response = await _dashboardService.GetTherapistDashboard();
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
@@ -36,6 +39,14 @@ namespace MentalHealthSystem.Controllers
         public async Task<IActionResult> GetReportsDashboard()
         {
             var response = await _dashboardService.GetReportsDashboard();
+            return response.Status ? Ok(response) : BadRequest(response);
+        }
+
+        [HttpGet("General")]
+        [Authorize]
+        public async Task<IActionResult> GetGeneralDashboard()
+        {
+            var response = await _dashboardService.GetGeneralDashboard();
             return response.Status ? Ok(response) : BadRequest(response);
         }
     }

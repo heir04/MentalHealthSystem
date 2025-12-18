@@ -12,7 +12,7 @@ namespace MentalHealthSystem.Controllers
         private readonly IFlaggedContentService _flaggedContentService = flaggedContentService;
 
         [HttpPost("ReportStory/{storyId}")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> ReportStory([FromRoute] Guid storyId, CreateFlaggedContentDto flaggedContentDto)
         {
             var response = await _flaggedContentService.ReportStory(flaggedContentDto, storyId);
@@ -20,7 +20,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpPost("ReportComment/{commentId}")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> ReportComment([FromRoute] Guid commentId, CreateFlaggedContentDto flaggedContentDto)
         {
             var response = await _flaggedContentService.ReportComment(flaggedContentDto, commentId);
@@ -28,7 +28,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpPut("Review/{id}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Review([FromRoute] Guid id, UpdateFlaggedContentDto updateContentDto)
         {
             var response = await _flaggedContentService.Review(id, updateContentDto);
@@ -36,7 +36,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("Get/{id}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             var response = await _flaggedContentService.Get(id);
@@ -44,7 +44,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("GetAll")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
             var response = await _flaggedContentService.GetAll();

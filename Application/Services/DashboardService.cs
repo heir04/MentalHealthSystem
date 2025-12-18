@@ -64,7 +64,6 @@ namespace MentalHealthSystem.Application.Services
                     Email = user.Email,
                     Username = user.Username,
                     Role = user.Role,
-                    IsActive = user.IsActive,
                     CreatedOn = user.CreatedOn
                 },
                 TotalStories = stories.Count(),
@@ -80,6 +79,95 @@ namespace MentalHealthSystem.Application.Services
                     CreatedOn = s.CreatedOn
                 }).ToList(),
                 UpcomingSessions = upcomingSessions.Take(5).Select(ts => new TherapySessionDto
+                {
+                    Id = ts.Id,
+                    UserId = ts.UserId,
+                    TherapistId = ts.TherapistId,
+                    Status = ts.Status.ToString()
+                }).ToList()
+            };
+
+            response.Status = true;
+            response.Message = "Success";
+            return response;
+        }
+
+        public async Task<BaseResponse<TherapistDashboardDto>> GetTherapistDashboard()
+        {
+            var response = new BaseResponse<TherapistDashboardDto>();
+            var userId = _validatorHelper.GetUserId();
+
+            if (userId == Guid.Empty)
+            {
+                response.Message = "User not found";
+                return response;
+            }
+
+            // Get therapist by user ID
+            var therapist = await _unitOfWork.Therapist.Get(t => t.UserId == userId && !t.IsDeleted);
+            if (therapist == null)
+            {
+                response.Message = "Therapist not found";
+                return response;
+            }
+
+            var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+
+            // Get all sessions for this therapist
+            var allSessions = await _unitOfWork.TherapySession.GetAll(ts => ts.TherapistId == therapist.Id && !ts.IsDeleted);
+
+            // Get session statistics by status
+            var pendingSessions = allSessions.Count(ts => ts.Status == TherapySessionStatus.Pending);
+            var scheduledSessions = allSessions.Count(ts => ts.Status == TherapySessionStatus.Scheduled);
+            var completedSessions = allSessions.Count(ts => ts.Status == TherapySessionStatus.Completed);
+            var cancelledSessions = allSessions.Count(ts => ts.Status == TherapySessionStatus.Cancelled);
+
+            // Get sessions this month
+            var sessionsThisMonth = allSessions.Count(ts => ts.CreatedOn >= startOfMonth);
+
+            // Get unique clients
+            var uniqueClientIds = allSessions.Select(ts => ts.UserId).Distinct().Count();
+
+            // Get upcoming sessions (Pending or Scheduled)
+            var upcomingSessions = allSessions
+                .Where(ts => ts.Status == TherapySessionStatus.Pending || ts.Status == TherapySessionStatus.Scheduled)
+                .OrderBy(ts => ts.CreatedOn)
+                .Take(10);
+
+            // Get recent sessions (all statuses, most recent first)
+            var recentSessions = allSessions
+                .OrderByDescending(ts => ts.CreatedOn)
+                .Take(10);
+
+            response.Data = new TherapistDashboardDto
+            {
+                Therapist = new TherapistDto
+                {
+                    Id = therapist.Id,
+                    UserId = therapist.UserId,
+                    FullName = therapist.FullName,
+                    Specialization = therapist.Specialization,
+                    CertificationLink = therapist.CertificationLink,
+                    Bio = therapist.Bio,
+                    ContactLink = therapist.ContactLink,
+                    Availability = therapist.Availability,
+                    UserName = therapist.User?.Username
+                },
+                TotalSessions = allSessions.Count(),
+                PendingSessions = pendingSessions,
+                ScheduledSessions = scheduledSessions,
+                CompletedSessions = completedSessions,
+                CancelledSessions = cancelledSessions,
+                TotalClients = uniqueClientIds,
+                SessionsThisMonth = sessionsThisMonth,
+                UpcomingSessions = upcomingSessions.Select(ts => new TherapySessionDto
+                {
+                    Id = ts.Id,
+                    UserId = ts.UserId,
+                    TherapistId = ts.TherapistId,
+                    Status = ts.Status.ToString()
+                }).ToList(),
+                RecentSessions = recentSessions.Select(ts => new TherapySessionDto
                 {
                     Id = ts.Id,
                     UserId = ts.UserId,
@@ -150,7 +238,6 @@ namespace MentalHealthSystem.Application.Services
                     Id = u.Id,
                     Username = u.Username,
                     Role = u.Role,
-                    IsActive = u.IsActive,
                     CreatedOn = u.CreatedOn
                 }).ToList(),
                 PendingReports = pendingReports.Select(fc => new FlaggedContentDto
@@ -194,10 +281,9 @@ namespace MentalHealthSystem.Application.Services
             var flaggedComments = allFlaggedContent.Count(fc => fc.CommentId != Guid.Empty);
 
             // Get deleted content this month (using IsDeleted flag)
-            var contentRemovedThisMonth = allFlaggedContent.Count(fc => 
-                fc.IsReviewed && 
-                fc.LastModifiedOn.HasValue && 
-                fc.LastModifiedOn.Value >= startOfMonth);
+            var contentRemovedThisMonth = allFlaggedContent.Count(fc =>
+                fc.IsReviewed &&
+                fc.LastModifiedOn >= startOfMonth);
 
             // Get recent flags
             var recentFlags = allFlaggedContent.OrderByDescending(fc => fc.CreatedOn).Take(20);
@@ -227,6 +313,71 @@ namespace MentalHealthSystem.Application.Services
                     FlaggedAt = fc.CreatedOn
                 }).ToList(),
                 FlagReasonBreakdown = flagReasonBreakdown
+            };
+
+            response.Status = true;
+            response.Message = "Success";
+            return response;
+        }
+
+        public async Task<BaseResponse<GeneralDashboardDto>> GetGeneralDashboard()
+        {
+            var response = new BaseResponse<GeneralDashboardDto>();
+
+            // Get all non-deleted stories
+            var allStories = await _unitOfWork.Story.GetAllStory(s => !s.IsDeleted);
+            var allComments = await _unitOfWork.Comment.GetAll(c => !c.IsDeleted);
+            var allReactions = await _unitOfWork.Reaction.GetAll(r => !r.IsDeleted);
+            var allUsers = await _unitOfWork.User.GetAll(u => !u.IsDeleted);
+
+            // Build stories with statistics
+            var storiesWithStats = new List<StoryWithStatsDto>();
+
+            foreach (var story in allStories)
+            {
+                // Get comments for this story
+                var storyComments = allComments.Where(c => c.StoryId == story.Id).ToList();
+
+                // Get reactions for this story
+                var storyReactions = await _unitOfWork.Reaction.GetReactionsByStoryAsync(story.Id);
+
+                // Get reaction breakdown by type
+                var reactionBreakdown = storyReactions
+                    .GroupBy(r => r.Type)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                storiesWithStats.Add(new StoryWithStatsDto
+                {
+                    Id = story.Id,
+                    UserId = story.UserId,
+                    UserName = story.User?.Username,
+                    Content = story.Content,
+                    CreatedOn = story.CreatedOn,
+                    CommentCount = storyComments.Count,
+                    ReactionCount = storyReactions.Count(),
+                    Comments = storyComments.Select(c => new CommentDto
+                    {
+                        Id = c.Id,
+                        StoryId = c.StoryId,
+                        UserId = c.UserId,
+                        UserName = c.User?.Username,
+                        Content = c.Content,
+                        CreatedOn = c.CreatedOn
+                    }).ToList(),
+                    ReactionBreakdown = reactionBreakdown.Any() ? reactionBreakdown : null
+                });
+            }
+
+            // Order by creation date (newest first)
+            storiesWithStats = storiesWithStats.OrderByDescending(s => s.CreatedOn).ToList();
+
+            response.Data = new GeneralDashboardDto
+            {
+                TotalStories = allStories.Count(),
+                TotalComments = allComments.Count(),
+                TotalReactions = allReactions.Count(),
+                TotalUsers = allUsers.Count(),
+                Stories = storiesWithStats
             };
 
             response.Status = true;

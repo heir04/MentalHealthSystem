@@ -47,6 +47,13 @@ namespace MentalHealthSystem.Controllers
             var response = await _userService.Create(userDto);
             return response.Status ? Ok(response) : BadRequest(response);
         }
+        
+        // [HttpPost("CreateAdmin")]
+        // public async Task<IActionResult> CreateAdmin(CreateUserDto userDto)
+        // {
+        //     var response = await _userService.CreateAdmin(userDto);
+        //     return response.Status ? Ok(response) : BadRequest(response);
+        // }
 
         [HttpPut("Update/{id}")]
         [Authorize]

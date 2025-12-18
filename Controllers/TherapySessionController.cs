@@ -12,7 +12,7 @@ namespace MentalHealthSystem.Controllers
         private readonly ITherapySessionService _therapySessionService = therapySessionService;
 
         [HttpPost("BookSession/{therapistId}")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> BookSession([FromRoute] Guid therapistId)
         {
             var response = await _therapySessionService.BookSession(therapistId);
@@ -28,7 +28,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("GetAllByTherapist")]
-        [Authorize]
+        [Authorize(Roles = "Therapist")]
         public async Task<IActionResult> GetAllByTherapist()
         {
             var response = await _therapySessionService.GetAllByTherapist();
@@ -36,7 +36,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("GetAllByActiveUser")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> GetAllByActiveUser()
         {
             var response = await _therapySessionService.GetAllByActiveUser();
@@ -44,7 +44,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpPut("UpdateSessionStatus/{id}")]
-        [Authorize]
+        [Authorize(Roles = "Therapist")]
         public async Task<IActionResult> UpdateSessionStatus([FromRoute] Guid id, [FromBody] TherapySessionStatus statusDto)
         {
             var response = await _therapySessionService.UpdateSessionStatus(id, statusDto);

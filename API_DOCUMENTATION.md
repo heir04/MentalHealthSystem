@@ -75,7 +75,7 @@ Authorization: Bearer <token>
 ### 2. Create User
 **POST** `/api/User/Create`
 
-Register a new user account.
+Register a new user account (public endpoint - no authentication required).
 
 **Request Body:**
 ```json
@@ -213,7 +213,7 @@ Get current authenticated user's profile.
 
 ### 1. Create Story
 **POST** `/api/Story/Create`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User only)
 
 Create a new story/post.
 
@@ -238,7 +238,7 @@ Create a new story/post.
 
 ### 2. Update Story
 **PUT** `/api/Story/Update/{id}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User only)
 
 Update an existing story.
 
@@ -265,9 +265,9 @@ Update an existing story.
 
 ### 3. Delete Story
 **POST** `/api/Story/Delete/{id}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User or Admin)
 
-Delete a story.
+Delete a story (users can delete own stories, admins can delete any).
 
 **Path Parameters:**
 - `id` (UUID) - Story ID
@@ -284,7 +284,8 @@ Delete a story.
 ---
 
 ### 4. Get All Stories
-**GET** `/api/Story/GetAll`
+**GET** `/api/Story/GetAll`  
+🔒 **Requires Authentication** (User, Therapist, or Admin)
 
 Retrieve all public stories.
 
@@ -309,7 +310,8 @@ Retrieve all public stories.
 ---
 
 ### 5. Get Story by ID
-**GET** `/api/Story/Get/{id}`
+**GET** `/api/Story/Get/{id}`  
+🔒 **Requires Authentication** (User, Therapist, or Admin)
 
 Get a specific story by ID.
 
@@ -345,7 +347,7 @@ Get a specific story by ID.
 
 ### 6. Get User's Stories
 **GET** `/api/Story/GetAllUserStory`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User only)
 
 Get all stories created by the authenticated user.
 
@@ -373,7 +375,7 @@ Get all stories created by the authenticated user.
 
 ### 1. Create Comment
 **POST** `/api/Comment/Create/{storyId}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User or Therapist)
 
 Add a comment to a story.
 
@@ -400,7 +402,7 @@ Add a comment to a story.
 
 ### 2. Update Comment
 **PUT** `/api/Comment/Update/{id}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User only)
 
 Update an existing comment.
 
@@ -427,9 +429,9 @@ Update an existing comment.
 
 ### 3. Delete Comment
 **POST** `/api/Comment/Delete/{id}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User or Admin)
 
-Delete a comment.
+Delete a comment (users can delete own comments, admins can delete any).
 
 **Path Parameters:**
 - `id` (UUID) - Comment ID
@@ -446,7 +448,8 @@ Delete a comment.
 ---
 
 ### 4. Get Comment
-**GET** `/api/Comment/Get/{id}`
+**GET** `/api/Comment/Get/{id}`  
+🔒 **Requires Authentication** (User, Therapist, or Admin)
 
 Get a specific comment by ID.
 
@@ -521,7 +524,59 @@ Get dashboard statistics and recent activity for the authenticated user.
 
 ---
 
-### 2. Get Admin Dashboard
+### 2. Get Therapist Dashboard
+**GET** `/api/Dashboard/Therapist`  
+🔒 **Requires Authentication** (Therapist only)
+
+Get dashboard statistics and session management data for therapists.
+
+**Response:**
+```json
+{
+  "message": "Success",
+  "status": true,
+  "data": {
+    "therapist": {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "userId": "456e7890-e89b-12d3-a456-426614174000",
+      "fullName": "Dr. Jane Smith",
+      "specialization": "Anxiety and Depression",
+      "certificationLink": "https://example.com/cert.pdf",
+      "bio": "Experienced therapist...",
+      "contactLink": "https://calendly.com/dr-smith",
+      "availability": 0,
+      "userName": "drjanesmith"
+    },
+    "totalSessions": 156,
+    "pendingSessions": 5,
+    "scheduledSessions": 8,
+    "completedSessions": 138,
+    "cancelledSessions": 5,
+    "totalClients": 42,
+    "sessionsThisMonth": 23,
+    "upcomingSessions": [
+      {
+        "id": "789e0123-e89b-12d3-a456-426614174000",
+        "userId": "111e2222-e89b-12d3-a456-426614174000",
+        "therapistId": "123e4567-e89b-12d3-a456-426614174000",
+        "status": "Scheduled"
+      }
+    ],
+    "recentSessions": [
+      {
+        "id": "222e3333-e89b-12d3-a456-426614174000",
+        "userId": "333e4444-e89b-12d3-a456-426614174000",
+        "therapistId": "123e4567-e89b-12d3-a456-426614174000",
+        "status": "Completed"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 3. Get Admin Dashboard
 **GET** `/api/Dashboard/Admin`  
 🔒 **Requires Authentication** (Admin only)
 
@@ -573,7 +628,7 @@ Get comprehensive system-wide statistics for administrators.
 
 ---
 
-### 3. Get Reports Dashboard
+### 4. Get Reports Dashboard
 **GET** `/api/Dashboard/Reports`  
 🔒 **Requires Authentication** (Admin only)
 
@@ -617,10 +672,67 @@ Get detailed content moderation statistics and flagged content analytics.
 
 ---
 
+### 5. Get General Dashboard
+**GET** `/api/Dashboard/General`  
+🔒 **Requires Authentication**
+
+Get all stories with complete statistics including comments and reactions.
+
+**Response:**
+```json
+{
+  "message": "Success",
+  "status": true,
+  "data": {
+    "totalStories": 4580,
+    "totalComments": 12340,
+    "totalReactions": 35670,
+    "totalUsers": 1250,
+    "stories": [
+      {
+        "id": "123e4567-e89b-12d3-a456-426614174000",
+        "userId": "456e7890-e89b-12d3-a456-426614174000",
+        "userName": "username",
+        "content": "My mental health journey story...",
+        "createdOn": "2025-12-17T10:30:00Z",
+        "commentCount": 15,
+        "reactionCount": 48,
+        "comments": [
+          {
+            "id": "789e0123-e89b-12d3-a456-426614174000",
+            "storyId": "123e4567-e89b-12d3-a456-426614174000",
+            "userId": "111e2222-e89b-12d3-a456-426614174000",
+            "userName": "commenter",
+            "content": "Thanks for sharing!",
+            "createdOn": "2025-12-17T11:00:00Z"
+          }
+        ],
+        "reactionBreakdown": {
+          "Like": 25,
+          "Love": 15,
+          "Wow": 8
+        }
+      }
+    ]
+  }
+}
+```
+
+**Features:**
+- **Complete story data** - All stories with full details
+- **Comment counts** - Number of comments per story
+- **Reaction counts** - Total reactions per story
+- **Reaction breakdown** - Count by reaction type (Like, Love, etc.)
+- **Full comments** - All comments for each story included
+- **Sorted by date** - Newest stories first
+- **User anonymity** - No email addresses exposed
+
+---
+
 ## Reaction System
 
 ### 1. React to Story
-**POST** `/api/Reaction/React/{storyId}`  
+**POST** `/api/Reaction/Story/{storyId}/React`  
 🔒 **Requires Authentication**
 
 Add a reaction to a story.
@@ -655,7 +767,7 @@ Add a reaction to a story.
 ---
 
 ### 2. React to Comment
-**POST** `/api/Reaction/React/{commentId}`  
+**POST** `/api/Reaction/Comment/{commentId}/React`  
 🔒 **Requires Authentication**
 
 Add a reaction to a comment.
@@ -698,7 +810,7 @@ Add a reaction to a comment.
 ---
 
 ### 3. Remove Reaction from Story
-**POST** `/api/Reaction/RemoveReaction/{storyId}`  
+**POST** `/api/Reaction/RemoveReact/{storyId}/Story`  
 🔒 **Requires Authentication**
 
 Remove user's reaction from a story.
@@ -718,7 +830,7 @@ Remove user's reaction from a story.
 ---
 
 ### 4. Remove Reaction from Comment
-**POST** `/api/Reaction/RemoveReaction/{commentId}`  
+**POST** `/api/Reaction/RemoveReact/{commentId}/Comment`  
 🔒 **Requires Authentication**
 
 Remove user's reaction from a comment.
@@ -738,7 +850,8 @@ Remove user's reaction from a comment.
 ---
 
 ### 5. Get Story Reactions
-**GET** `/api/Reaction/GetReactions/{storyId}`
+**GET** `/api/Reaction/Story/{storyId}/Reactions`  
+🔒 **Requires Authentication**
 
 Get all reactions for a story.
 
@@ -767,7 +880,8 @@ Get all reactions for a story.
 ---
 
 ### 6. Get Comment Reactions
-**GET** `/api/Reaction/GetReactions/{commentId}`
+**GET** `/api/Reaction/Comment/{commentId}/Reactions`  
+🔒 **Requires Authentication**
 
 Get all reactions for a comment.
 
@@ -796,7 +910,8 @@ Get all reactions for a comment.
 ---
 
 ### 7. Get Story Reaction Summary
-**GET** `/api/Reaction/GetReactions/{storyId}/Summary`
+**GET** `/api/Reaction/Story/{storyId}/Reactions/Summary`  
+🔒 **Requires Authentication**
 
 Get reaction summary (counts by type) for a story.
 
@@ -826,7 +941,8 @@ Get reaction summary (counts by type) for a story.
 ---
 
 ### 8. Get Comment Reaction Summary
-**GET** `/api/Reaction/GetReactions/{commentId}/Summary`
+**GET** `/api/Reaction/Comment/{commentId}/Reactions/Summary`  
+🔒 **Requires Authentication**
 
 Get reaction summary (counts by type) for a comment.
 
@@ -858,9 +974,10 @@ Get reaction summary (counts by type) for a comment.
 ## Therapist Management
 
 ### 1. Create Therapist
-**POST** `/api/Therapist/Create`
+**POST** `/api/Therapist/Create`  
+🔒 **Requires Authentication** (Admin only)
 
-Register a new therapist (requires approval).
+Register a new therapist.
 
 **Request Body:**
 ```json
@@ -894,7 +1011,7 @@ Register a new therapist (requires approval).
 
 ### 2. Update Therapist
 **PUT** `/api/Therapist/Update/{id}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (Admin only)
 
 Update therapist information.
 
@@ -923,29 +1040,9 @@ Update therapist information.
 
 ---
 
-### 3. Approve Therapist
-**PUT** `/api/Therapist/Approve/{id}`  
-🔒 **Requires Authentication** (Admin only)
-
-Approve a therapist's registration.
-
-**Path Parameters:**
-- `id` (UUID) - Therapist ID
-
-**Response:**
-```json
-{
-  "message": "Success",
-  "status": true,
-  "data": null
-}
-```
-
----
-
-### 4. Delete Therapist
+### 3. Delete Therapist
 **POST** `/api/Therapist/Delete/{id}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (Admin only)
 
 Delete a therapist profile.
 
@@ -963,10 +1060,11 @@ Delete a therapist profile.
 
 ---
 
-### 5. Get All Therapists
-**GET** `/api/Therapist/GetAll`
+### 4. Get All Therapists
+**GET** `/api/Therapist/GetAll`  
+🔒 **Requires Authentication**
 
-Get all approved therapists.
+Get all therapists (available to all authenticated users for browsing and booking).
 
 **Response:**
 ```json
@@ -992,8 +1090,9 @@ Get all approved therapists.
 
 ---
 
-### 6. Get Therapist by ID
-**GET** `/api/Therapist/Get/{id}`
+### 5. Get Therapist by ID
+**GET** `/api/Therapist/Get/{id}`  
+🔒 **Requires Authentication**
 
 Get specific therapist details.
 
@@ -1025,7 +1124,7 @@ Get specific therapist details.
 
 ### 1. Book Session
 **POST** `/api/TherapySession/BookSession/{therapistId}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User only)
 
 Book a therapy session with a therapist.
 
@@ -1101,7 +1200,7 @@ Get all sessions for the authenticated therapist.
 
 ### 4. Get Sessions by User
 **GET** `/api/TherapySession/GetAllByActiveUser`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User only)
 
 Get all sessions for the authenticated user.
 
@@ -1125,7 +1224,7 @@ Get all sessions for the authenticated user.
 
 ### 5. Update Session Status
 **PUT** `/api/TherapySession/UpdateSessionStatus/{id}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (Therapist only)
 
 Update the status of a therapy session.
 
@@ -1163,7 +1262,7 @@ Update the status of a therapy session.
 
 ### 1. Report Story
 **POST** `/api/FlaggedContent/ReportStory/{storyId}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User only)
 
 Report inappropriate content in a story.
 
@@ -1196,7 +1295,7 @@ Report inappropriate content in a story.
 
 ### 2. Report Comment
 **POST** `/api/FlaggedContent/ReportComment/{commentId}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (User only)
 
 Report inappropriate content in a comment.
 
@@ -1229,7 +1328,7 @@ Report inappropriate content in a comment.
 
 ### 3. Review Flagged Content
 **PUT** `/api/FlaggedContent/Review/{id}`  
-🔒 **Requires Authentication** (Admin/Moderator only)
+🔒 **Requires Authentication** (Admin only)
 
 Review and update the status of flagged content.
 
@@ -1257,7 +1356,7 @@ Review and update the status of flagged content.
 
 ### 4. Get Flagged Content
 **GET** `/api/FlaggedContent/Get/{id}`  
-🔒 **Requires Authentication**
+🔒 **Requires Authentication** (Admin only)
 
 Get specific flagged content details.
 
@@ -1287,7 +1386,7 @@ Get specific flagged content details.
 
 ### 5. Get All Flagged Content
 **GET** `/api/FlaggedContent/GetAll`  
-🔒 **Requires Authentication** (Admin/Moderator only)
+🔒 **Requires Authentication** (Admin only)
 
 Get all flagged content for review.
 

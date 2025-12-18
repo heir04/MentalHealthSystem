@@ -12,6 +12,7 @@ namespace MentalHealthSystem.Controllers
         private readonly ITherapistService _therapistService = therapistService;
 
         [HttpPost("Create")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(CreateTherapistDto therapistDto)
         {
             var response = await _therapistService.Create(therapistDto);
@@ -19,23 +20,23 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpPut("Update/{id}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update([FromRoute] Guid id, UpdateTherapistDto therapistDto)
         {
             var response = await _therapistService.Update(id, therapistDto);
             return response.Status ? Ok(response) : BadRequest(response);
         }
 
-        [HttpPut("Approve/{id}")]
-        [Authorize]
-        public async Task<IActionResult> ApproveTherapist([FromRoute] Guid id)
-        {
-            var response = await _therapistService.ApproveTherapist(id);
-            return response.Status ? Ok(response) : BadRequest(response);
-        }
+        // [HttpPut("Approve/{id}")]
+        // [Authorize]
+        // public async Task<IActionResult> ApproveTherapist([FromRoute] Guid id)
+        // {
+        //     var response = await _therapistService.ApproveTherapist(id);
+        //     return response.Status ? Ok(response) : BadRequest(response);
+        // }
 
         [HttpPost("Delete/{id}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var response = await _therapistService.Delete(id);
@@ -43,6 +44,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("GetAll")]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var response = await _therapistService.GetAll();
@@ -50,6 +52,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("Get/{id}")]
+        [Authorize]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             var response = await _therapistService.Get(id);
