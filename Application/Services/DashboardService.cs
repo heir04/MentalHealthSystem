@@ -100,7 +100,7 @@ namespace MentalHealthSystem.Application.Services
             }
 
             // Get therapist by user ID
-            var therapist = await _unitOfWork.Therapist.Get(t => t.UserId == userId && !t.IsDeleted);
+            var therapist = await _unitOfWork.Therapist.GetTherapist(t => t.UserId == userId && !t.IsDeleted);
             if (therapist == null)
             {
                 response.Message = "Therapist not found";
@@ -142,12 +142,14 @@ namespace MentalHealthSystem.Application.Services
                     Id = therapist.Id,
                     UserId = therapist.UserId,
                     FullName = therapist.FullName,
+                    Email = therapist.User.Email,
                     Specialization = therapist.Specialization,
                     CertificationLink = therapist.CertificationLink,
                     Bio = therapist.Bio,
                     ContactLink = therapist.ContactLink,
                     Availability = therapist.Availability,
-                    UserName = therapist.User?.Username
+                    UserName = therapist.User?.Username,
+                    Role = therapist.User.Role
                 },
                 TotalSessions = allSessions.Count(),
                 PendingSessions = pendingSessions,

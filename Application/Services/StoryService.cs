@@ -191,7 +191,7 @@ namespace MentalHealthSystem.Application.Services
         {
             var response = new BaseResponse<UpdateStoryDto>();
 
-            var story = await _unitOfWork.Story.Get(s => !s.IsDeleted);
+            var story = await _unitOfWork.Story.Get(s => s.Id == id && !s.IsDeleted);
             if (story is null)
             {
                 response.Message = "Not found!";
@@ -205,7 +205,7 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
-            if (userId != story.UserId && _validatorHelper.GetUserRole() != "Admin")
+            if (userId != story.UserId)
             {
                 response.Message = "Not Authorized";
                 return response;

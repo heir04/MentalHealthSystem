@@ -8,6 +8,8 @@ namespace MentalHealthSystem.Application.DTOs
         public Guid UserId { get; set; }
         public string? FullName { get; set; }
         public string? Specialization { get; set; }
+        public string? Email { get; set; }
+        public string? Role { get; set; }
         public string? CertificationLink { get; set; }
         public string? Bio { get; set; }
         public string? ContactLink { get; set; }
