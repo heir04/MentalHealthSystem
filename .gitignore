@@ -421,7 +421,7 @@ FodyWeavers.xsd
 .env.production
 
 # ASP.NET Core appsettings files (exclude sensitive configurations)
-appsettings.json
+#appsettings.json
 appsettings.*.json
 !appsettings.Development.json.template
 !appsettings.Production.json.template

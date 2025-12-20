@@ -1256,10 +1256,10 @@ Update the status of a therapy session.
 ```
 
 **Available Status Values:**
-- `0` - Pending
-- `1` - Scheduled
-- `2` - Completed
-- `3` - Cancelled
+- `0` - Scheduled
+- `1` - Completed
+- `2` - Cancelled
+- `3` - Pending
 
 **Response:**
 ```json

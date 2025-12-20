@@ -96,7 +96,7 @@ namespace MentalHealthSystem.Application.Services
         {
             var response = new BaseResponse<IEnumerable<TherapySessionDto>>();
             var userId = _validatorHelper.GetUserId();
-            var sessions = await _unitOfWork.TherapySession.GetAll(ts => ts.UserId == userId);
+            var sessions = await _unitOfWork.TherapySession.GetAllSessions(ts => ts.UserId == userId && !ts.IsDeleted);
             if (!sessions.Any())
             {
                 response.Message = "No session found";
