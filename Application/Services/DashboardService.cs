@@ -35,22 +35,17 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
-            var stories = await _unitOfWork.Story.GetAll(s => s.UserId == userId && !s.IsDeleted);
+            var recentStories = await _unitOfWork.Story.GetAllStory(s => s.UserId == userId && !s.IsDeleted);
             var comments = await _unitOfWork.Comment.GetAll(c => c.UserId == userId && !c.IsDeleted);
-            
-            var userStoryIds = stories.Select(s => s.Id).ToList();
-            var reactionsReceived = 0;
-            foreach (var storyId in userStoryIds)
-            {
-                var storyReactions = await _unitOfWork.Reaction.GetReactionsByStoryAsync(storyId);
-                reactionsReceived += storyReactions.Count();
-            }
+
+            var userStoryIds = recentStories.Select(s => s.Id).ToList();
+            var allReactions = await _unitOfWork.Reaction.GetAll(r => 
+                userStoryIds.Contains(r.StoryId ?? Guid.Empty) && !r.IsDeleted);
+            var reactionsReceived = allReactions.Count();
 
             var upcomingSessions = await _unitOfWork.TherapySession.GetAll(ts => 
                 ts.UserId == userId && 
                 (ts.Status == TherapySessionStatus.Pending || ts.Status == TherapySessionStatus.Scheduled));
-
-            var recentStories = await _unitOfWork.Story.GetAllStory(s => s.UserId == userId && !s.IsDeleted);
 
             response.Data = new UserDashboardDto
             {
@@ -62,7 +57,7 @@ namespace MentalHealthSystem.Application.Services
                     Role = user.Role,
                     CreatedOn = user.CreatedOn
                 },
-                TotalStories = stories.Count(),
+                TotalStories = recentStories.Count(),
                 TotalComments = comments.Count(),
                 TotalReactionsReceived = reactionsReceived,
                 UpcomingSessionsCount = upcomingSessions.Count(),
@@ -99,7 +94,6 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
-            // Get therapist by user ID
             var therapist = await _unitOfWork.Therapist.GetTherapist(t => t.UserId == userId && !t.IsDeleted);
             if (therapist == null)
             {
@@ -109,28 +103,22 @@ namespace MentalHealthSystem.Application.Services
 
             var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
 
-            // Get all sessions for this therapist
             var allSessions = await _unitOfWork.TherapySession.GetAll(ts => ts.TherapistId == therapist.Id && !ts.IsDeleted);
 
-            // Get session statistics by status
             var pendingSessions = allSessions.Count(ts => ts.Status == TherapySessionStatus.Pending);
             var scheduledSessions = allSessions.Count(ts => ts.Status == TherapySessionStatus.Scheduled);
             var completedSessions = allSessions.Count(ts => ts.Status == TherapySessionStatus.Completed);
             var cancelledSessions = allSessions.Count(ts => ts.Status == TherapySessionStatus.Cancelled);
 
-            // Get sessions this month
             var sessionsThisMonth = allSessions.Count(ts => ts.CreatedOn >= startOfMonth);
 
-            // Get unique clients
             var uniqueClientIds = allSessions.Select(ts => ts.UserId).Distinct().Count();
 
-            // Get upcoming sessions (Pending or Scheduled)
             var upcomingSessions = allSessions
                 .Where(ts => ts.Status == TherapySessionStatus.Pending || ts.Status == TherapySessionStatus.Scheduled)
                 .OrderBy(ts => ts.CreatedOn)
                 .Take(10);
 
-            // Get recent sessions (all statuses, most recent first)
             var recentSessions = allSessions
                 .OrderByDescending(ts => ts.CreatedOn)
                 .Take(10);
@@ -321,7 +309,20 @@ namespace MentalHealthSystem.Application.Services
             var allComments = await _unitOfWork.Comment.GetAll(c => !c.IsDeleted);
             var allUsers = await _unitOfWork.User.GetAll(u => !u.IsDeleted);
             
-            var totalReactions = await _unitOfWork.Reaction.GetReactionCountAsync(null, null);
+            // Fetch all reactions once instead of per story/comment
+            var allReactions = await _unitOfWork.Reaction.GetAll(r => !r.IsDeleted);
+            var totalReactions = allReactions.Count();
+
+            // Group reactions by story and comment in memory
+            var reactionsByStory = allReactions
+                .Where(r => r.StoryId.HasValue)
+                .GroupBy(r => r.StoryId.Value)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var reactionsByComment = allReactions
+                .Where(r => r.CommentId.HasValue)
+                .GroupBy(r => r.CommentId.Value)
+                .ToDictionary(g => g.Key, g => g.Count());
 
             var storiesWithStats = new List<StoryWithStatsDto>();
 
@@ -329,15 +330,24 @@ namespace MentalHealthSystem.Application.Services
             {
                 var storyComments = allComments.Where(c => c.StoryId == story.Id && !c.IsDeleted).ToList();
 
-                var storyReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(story.Id, null);
+                // Get reactions from in-memory dictionary
+                var storyReactions = reactionsByStory.ContainsKey(story.Id) 
+                    ? reactionsByStory[story.Id] 
+                    : new List<Domain.Entities.Reaction>();
 
-                var reactionGroups = await _unitOfWork.Reaction.GetReactionGroupsByStoryAsync(story.Id);
-                var reactionBreakdown = reactionGroups.ToDictionary(g => g.Key, g => g.Count());
+                var storyReactionCount = storyReactions.Count;
+                var reactionBreakdown = storyReactions
+                    .GroupBy(r => r.Type)
+                    .ToDictionary(g => g.Key, g => g.Count());
 
                 var commentDtos = new List<CommentDto>();
                 foreach (var comment in storyComments.OrderByDescending(c => c.CreatedOn))
                 {
-                    var commentReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(null, comment.Id);
+                    // Get comment reaction count from in-memory dictionary
+                    var commentReactionCount = reactionsByComment.ContainsKey(comment.Id) 
+                        ? reactionsByComment[comment.Id] 
+                        : 0;
+
                     commentDtos.Add(new CommentDto
                     {
                         Id = comment.Id,
