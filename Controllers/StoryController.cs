@@ -44,7 +44,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("Get/{id}")]
-        [Authorize(Roles = "User,Therapist,Admin")]
+        [AllowAnonymous]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             var response = await _storyService.Get(id);

@@ -307,7 +307,7 @@ namespace MentalHealthSystem.Application.Services
 
             var allStories = await _unitOfWork.Story.GetAllStory(s => !s.IsDeleted);
             var allComments = await _unitOfWork.Comment.GetAll(c => !c.IsDeleted);
-            var allUsers = await _unitOfWork.User.GetAll(u => !u.IsDeleted);
+            // var allUsers = await _unitOfWork.User.GetAll(u => !u.IsDeleted);
             
             // Fetch all reactions once instead of per story/comment
             var allReactions = await _unitOfWork.Reaction.GetAll(r => !r.IsDeleted);
@@ -328,7 +328,7 @@ namespace MentalHealthSystem.Application.Services
 
             foreach (var story in allStories)
             {
-                var storyComments = allComments.Where(c => c.StoryId == story.Id && !c.IsDeleted).ToList();
+                var storyCommentsCount = allComments.Count(c => c.StoryId == story.Id && !c.IsDeleted);
 
                 // Get reactions from in-memory dictionary
                 var storyReactions = reactionsByStory.ContainsKey(story.Id) 
@@ -341,24 +341,24 @@ namespace MentalHealthSystem.Application.Services
                     .ToDictionary(g => g.Key, g => g.Count());
 
                 var commentDtos = new List<CommentDto>();
-                foreach (var comment in storyComments.OrderByDescending(c => c.CreatedOn))
-                {
-                    // Get comment reaction count from in-memory dictionary
-                    var commentReactionCount = reactionsByComment.ContainsKey(comment.Id) 
-                        ? reactionsByComment[comment.Id] 
-                        : 0;
+                // foreach (var comment in storyComments.OrderByDescending(c => c.CreatedOn))
+                // {
+                //     // Get comment reaction count from in-memory dictionary
+                //     var commentReactionCount = reactionsByComment.ContainsKey(comment.Id) 
+                //         ? reactionsByComment[comment.Id] 
+                //         : 0;
 
-                    commentDtos.Add(new CommentDto
-                    {
-                        Id = comment.Id,
-                        StoryId = comment.StoryId,
-                        UserId = comment.UserId,
-                        UserName = comment.User?.Username,
-                        Content = comment.Content,
-                        LikesCount = commentReactionCount,
-                        CreatedOn = comment.CreatedOn
-                    });
-                }
+                //     commentDtos.Add(new CommentDto
+                //     {
+                //         Id = comment.Id,
+                //         StoryId = comment.StoryId,
+                //         UserId = comment.UserId,
+                //         UserName = comment.User?.Username,
+                //         Content = comment.Content,
+                //         LikesCount = commentReactionCount,
+                //         CreatedOn = comment.CreatedOn
+                //     });
+                // }
 
                 storiesWithStats.Add(new StoryWithStatsDto
                 {
@@ -367,7 +367,7 @@ namespace MentalHealthSystem.Application.Services
                     UserName = story.User?.Username,
                     Content = story.Content,
                     CreatedOn = story.CreatedOn,
-                    CommentCount = storyComments.Count,
+                    CommentCount = storyCommentsCount,
                     ReactionCount = storyReactionCount,
                     Comments = commentDtos,
                     ReactionBreakdown = reactionBreakdown.Any() ? reactionBreakdown : null
@@ -379,9 +379,8 @@ namespace MentalHealthSystem.Application.Services
             response.Data = new GeneralDashboardDto
             {
                 TotalStories = allStories.Count(),
-                TotalComments = allComments.Count(),
                 TotalReactions = totalReactions,
-                TotalUsers = allUsers.Count(),
+                // TotalUsers = allUsers.Count(),
                 Stories = storiesWithStats
             };
 

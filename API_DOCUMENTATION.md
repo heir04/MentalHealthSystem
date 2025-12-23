@@ -311,14 +311,14 @@ Retrieve all public stories.
 
 ### 5. Get Story by ID
 **GET** `/api/Story/Get/{id}`  
-🔒 **Requires Authentication** (User, Therapist, or Admin)
+🌐 **Public Endpoint** (No authentication required)
 
-Get a specific story by ID.
+Get a specific story by ID. Anonymous users can view stories but usernames will be displayed as "Anonymous" for privacy protection.
 
 **Path Parameters:**
 - `id` (UUID) - Story ID
 
-**Response:**
+**Response (Authenticated User):**
 ```json
 {
   "message": "Success",
@@ -340,6 +340,34 @@ Get a specific story by ID.
         "likesCount": 8,
         "createdOn": "2025-09-11T13:00:00Z",
         "userName": "commenter"
+      }
+    ]
+  }
+}
+```
+
+**Response (Anonymous User):**
+```json
+{
+  "message": "Success",
+  "status": true,
+  "data": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "userId": "456e7890-e89b-12d3-a456-426614174000",
+    "content": "Story content...",
+    "createdOn": "2025-09-11T12:00:00Z",
+    "userName": "Anonymous",
+    "commentsCount": 5,
+    "likesCount": 42,
+    "comments": [
+      {
+        "id": "789e0123-e89b-12d3-a456-426614174000",
+        "storyId": "123e4567-e89b-12d3-a456-426614174000",
+        "userId": "111e2222-e89b-12d3-a456-426614174000",
+        "content": "Great story!",
+        "likesCount": 8,
+        "createdOn": "2025-09-11T13:00:00Z",
+        "userName": "Anonymous"
       }
     ]
   }

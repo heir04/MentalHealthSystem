@@ -71,6 +71,42 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
+            if (_validatorHelper.GetUserId() == Guid.Empty)
+            {
+                var storyReactCount = await _unitOfWork.Reaction.GetReactionCountAsync(story.Id, null);
+
+                var commentDto = new List<CommentDto>();
+                foreach (var comment in story.Comments.Where(c => !c.IsDeleted))
+                {
+                    var commentReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(null, comment.Id);
+                    commentDto.Add(new CommentDto
+                    {
+                        Id = comment.Id,
+                        Content = comment.Content,
+                        StoryId = comment.StoryId,
+                        UserId = comment.UserId,
+                        LikesCount = commentReactionCount,
+                        UserName = "Anonymous",
+                        CreatedOn = comment.CreatedOn
+                    });
+                }
+
+                response.Data = new StoryDto
+                {
+                    Id = story.Id,
+                    UserId = story.UserId,
+                    UserName = "Anonymous",
+                    Content = story.Content,
+                    CommentsCount = story.Comments?.Count(c => !c.IsDeleted) ?? 0,
+                    LikesCount = storyReactCount,
+                    CreatedOn = story.CreatedOn,
+                    Comments = commentDto
+                };
+                response.Message = "Success";
+                response.Status = true;
+                return response;
+            }
+
             var storyReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(story.Id, null);
 
             var commentDtos = new List<CommentDto>();
