@@ -364,7 +364,7 @@ namespace MentalHealthSystem.Application.Services
                 {
                     Id = story.Id,
                     UserId = story.UserId,
-                    UserName = story.User?.Username,
+                    UserName = "Anonymous",
                     Content = story.Content,
                     CreatedOn = story.CreatedOn,
                     CommentCount = storyCommentsCount,

@@ -36,7 +36,7 @@ namespace MentalHealthSystem.Controllers
         }
 
         [HttpGet("GetAll")]
-        [Authorize(Roles = "User,Therapist,Admin")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var response = await _storyService.GetAll();
