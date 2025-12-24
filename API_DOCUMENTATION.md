@@ -285,9 +285,9 @@ Delete a story (users can delete own stories, admins can delete any).
 
 ### 4. Get All Stories
 **GET** `/api/Story/GetAll`  
-🔒 **Requires Authentication** (User, Therapist, or Admin)
+🌐 **Public Endpoint** (No authentication required)
 
-Retrieve all public stories.
+Retrieve all public stories. Anyone can view stories without authentication.
 
 **Response:**
 ```json

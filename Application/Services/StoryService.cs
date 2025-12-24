@@ -70,7 +70,7 @@ namespace MentalHealthSystem.Application.Services
                 response.Message = "Not Found";
                 return response;
             }
-            
+
             var storyReactionCount = await _unitOfWork.Reaction.GetReactionCountAsync(story.Id, null);
 
             var commentDtos = new List<CommentDto>();
@@ -109,6 +109,7 @@ namespace MentalHealthSystem.Application.Services
         {
             var response = new BaseResponse<IEnumerable<StoryDto>>();
             var stories = await _unitOfWork.Story.GetAllStory(s => !s.IsDeleted);
+            var allReactions = await _unitOfWork.Reaction.GetAll(r => !r.IsDeleted);
 
             if (stories is null || !stories.Any())
             {
@@ -116,14 +117,24 @@ namespace MentalHealthSystem.Application.Services
                 return response;
             }
 
-            response.Data = [.. stories.Select(s => new StoryDto
+            var storyDtos = new List<StoryDto>();
+            foreach (var story in stories)
             {
-                Id = s.Id,
-                UserId = s.UserId,
-                UserName = s.User?.Username,
-                Content = s.Content,
-                CreatedOn = s.CreatedOn,
-            })];
+                var storyReactionCount = allReactions.Count(r => r.StoryId == story.Id && !r.IsDeleted);
+
+                storyDtos.Add(new StoryDto
+                {
+                    Id = story.Id,
+                    UserId = story.UserId,
+                    UserName = "Anonymous",
+                    Content = story.Content,
+                    CommentsCount = story.Comments?.Count(c => !c.IsDeleted) ?? 0,
+                    LikesCount = storyReactionCount,
+                    CreatedOn = story.CreatedOn,
+                });
+            }
+
+            response.Data = storyDtos;
             response.Message = "Success";
             response.Status = true;
             return response;
